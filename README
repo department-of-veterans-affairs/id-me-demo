@@ -1,0 +1,11 @@
+This is a very simple proof-of-concept service to implement an Account API that relies on an external authentication service.
+
+It providers the following services:
+
+1. An API for checking to see if a session has been established;
+2. An API for destroying a session;
+3. A redirect link for transfering control to an external identity provider/authentication service;
+4. A callback that an external identity provider/authentication service can use to establish a new session.
+
+Once a session has been established, access to other API methods is secured by the session.
+

@@ -1,0 +1,74 @@
+<html>
+<head>
+  <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+  <script type="text/javascript">
+    // when the page loads, check to see if there's an active session or not.
+    $(document).ready(function() {
+      console.log("Starting up!");
+
+      // Hide the welcome and sign in blocks, because we don't yet know if there's a session or not.
+      $('#sign-in').hide();
+      $('#signed-in').hide();
+
+      // define behavior of sign out link
+      $('.sign-out-link').click(function(){
+        console.log('Signing off!');
+        $.ajax('/api/session',
+          {
+            url: '/api/session',
+            method: 'DELETE',
+            error: function(jqXHR, textStatus, errorThrown) {
+              console.log('Error deleting session: ' + textStatus + " : " + errorThrown);
+            },
+            success: function(result) {
+              $('#signed-in').hide();
+              $('#welcome').html("");
+              $('#sign-in').show();
+            }
+          }
+        );
+      });
+
+      // Define behavior of the profile link: make a call to retrieve the profile info via the API and display it.
+      $('.profile-link').click(function(){
+        console.log("Showing profile.");
+        $.get('/api/profile',
+          null,
+          function(data, textStatus, jqXHR) {
+            profile = data['profile'];
+            $('#content').html("<ul><li>First name: " + profile['first_name'] + "</li><li>Last name: " + profile['last_name'] + "</li><li>City: " + profile['city'] + "</li><li>State: " + profile['state'] + "</li><li>Phone: " + profile['phone_number'] + "</li></ul>");
+          }
+        )
+      });
+
+      // Make ajax request to get the session information; if there's a session, welcome the user; if not, just show the homepage with a sign in link
+      $.get('/api/session',
+        null,
+        function(data, textStatus, jqXHR) {
+          $('#welcome').html("Hello, " + data['user']['name']);
+          $('#signed-in').show();
+        }
+      )
+      .fail(function(){
+        $('#sign-in').show();
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>Cool Site</h1>
+  <div id="sign-in">
+    <a href="/sign_in">Sign in</a>
+  </div>
+  <div id="signed-in">
+    <div id="welcome"></div>
+    <div id="sign-out">
+      <a class="sign-out-link" href="#">Sign out</a>
+    </div>
+    <div id="actions">
+      <a class="profile-link" href="#">Profile</a>
+    </div>
+    <div id="content">
+    </div>
+  </div>
+</body>

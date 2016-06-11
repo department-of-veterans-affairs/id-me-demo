@@ -36,7 +36,7 @@
           null,
           function(data, textStatus, jqXHR) {
             profile = data['profile'];
-            $('#content').html("<ul><li>First name: " + profile['first_name'] + "</li><li>Last name: " + profile['last_name'] + "</li><li>City: " + profile['city'] + "</li><li>State: " + profile['state'] + "</li><li>Phone: " + profile['phone_number'] + "</li></ul>");
+            $('#content').html("<ul><li>First name: " + profile['first_name'] + "</li><li>Last name: " + profile['last_name'] + "</li><li>Zip: " + profile['zip'] + "</li><li>Email: " + profile['email'] + "</li><li>UID: " + profile['uid'] + "</li></ul>");
           }
         )
       });
@@ -45,7 +45,7 @@
       $.get('/api/session',
         null,
         function(data, textStatus, jqXHR) {
-          $('#welcome').html("Hello, " + data['user']['name']);
+          $('#welcome').html("Hello, " + data['user']['attributes']['email']);
           $('#signed-in').show();
         }
       )

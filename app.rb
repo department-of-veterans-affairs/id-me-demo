@@ -4,12 +4,23 @@ require 'ruby-saml'
 
 enable :sessions
 set :session_secret, 'secret!'
+set :server, 'thin'
 
 SAML_SETTINGS = OneLogin::RubySaml::Settings.new
-SAML_SETTINGS.idp_sso_target_url             = "https://app.onelogin.com/trust/saml2/http-post/sso/362804"
-SAML_SETTINGS.idp_cert_fingerprint           = "D4:A1:E4:25:AE:E1:0E:03:46:C5:42:3D:4C:56:BA:A3:A6:CB:AB:9E"
-SAML_SETTINGS.name_identifier_format         = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
-SAML_SETTINGS.idp_slo_target_url             = "https://app.onelogin.com/trust/saml2/http-redirect/slo/362804"
+SAML_SETTINGS.assertion_consumer_service_url = "http://localhost:4567/auth/saml/callback"
+SAML_SETTINGS.certificate                    = File.read('certs/greg-localhost.crt')
+SAML_SETTINGS.private_key                    = File.read('certs/greg-localhost.key')
+SAML_SETTINGS.authn_context                  = "authentication"
+
+# Use the .us for the "production" version; use .localhost for running locally with ID.me
+#SAML_SETTINGS.issuer                         = "saml-rp.adhocteam.us"
+SAML_SETTINGS.issuer                         = "saml-rp.adhocteam.localhost"
+
+
+parser = OneLogin::RubySaml::IdpMetadataParser.new
+parser.parse_remote("https://api.idmelabs.com/saml/metadata", true, {settings: SAML_SETTINGS})
+
+puts SAML_SETTINGS.inspect
 
 before '/api/*' do
   content_type 'application/json'
@@ -32,7 +43,8 @@ end
 
 get '/api/profile' do
   if session['user']
-    profile = {first_name: "Joe", last_name: "User", city: "Springfield", state: "OR", phone_number: "1234567890"}
+    attributes = session['user'][:attributes]
+    profile = {first_name: attributes['fname'], last_name: attributes['lname'], zip: attributes['zip'], email: attributes['email'], uid: attributes['uuid']}
     [200, {profile: profile}.to_json]
   else
     401
@@ -52,11 +64,13 @@ get '/sign_in' do
 end
 
 # Callback that is called by identity provider with SAML assertion containing the user information; would normally be a post with the assertion. Here, we're just establishing a session as a random user.
-post '/auth/saml/callback' do
-  saml_response = OneLogin::RubySaml::Response.new(params[:SAMLResponse])
-  saml_response.settings = SAML_SETTINGS
-  if saml_response.is_valid?
-    session[:user] = { name: saml_response.name_id }
+get '/auth/saml/callback' do
+  saml_response = OneLogin::RubySaml::Response.new(params[:SAMLResponse], settings: SAML_SETTINGS)
+  if saml_response.is_valid?(true)
+    session[:user] = { name: saml_response.name_id, attributes: saml_response.attributes.all.to_h }
+  else
+    puts "INVALID REPSONSE"
+    puts saml_response.errors.inspect
   end
   redirect to('/')
 end

@@ -20,3 +20,8 @@ Notes on various identity providers:
 OneLogin - very simple to set up on your own. This set up does not use SAML metadata, it's currently the master branch, just configure the individual SAML settings.
 ID.me - you'll need to have ID.me set you up as a relying party, and will need to generate a self-signed certificate to send them. Use the ID.me branch.
 
+Running
+
+From the console:
+
+  bundle exec ruby app.rb

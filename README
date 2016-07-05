@@ -9,3 +9,14 @@ It providers the following services:
 
 Once a session has been established, access to other API methods is secured by the session.
 
+Identity Providers
+
+Any SAML 2.0 Identity Provider can be configured to provide federated authentication.
+
+The quickest and easiest way to integrate a new IdP is to point the application at their metadata file (app.rb:19-20).
+
+Notes on various identity providers:
+
+OneLogin - very simple to set up on your own. This set up does not use SAML metadata, it's currently the master branch, just configure the individual SAML settings.
+ID.me - you'll need to have ID.me set you up as a relying party, and will need to generate a self-signed certificate to send them. Use the ID.me branch.
+

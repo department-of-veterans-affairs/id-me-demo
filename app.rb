@@ -10,7 +10,10 @@ SAML_SETTINGS = OneLogin::RubySaml::Settings.new
 SAML_SETTINGS.assertion_consumer_service_url = "http://localhost:4567/auth/saml/callback"
 SAML_SETTINGS.certificate                    = File.read('certs/greg-localhost.crt')
 SAML_SETTINGS.private_key                    = File.read('certs/greg-localhost.key')
+
+# To require just a username and password, use "authentication" as the context; for full identity proofing, use the LOA3 url.
 SAML_SETTINGS.authn_context                  = "authentication"
+# SAML_SETTINGS.authn_context                  = "http://idmanagement.gov/ns/assurance/loa/3"
 
 # Use the .us for the "production" version; use .localhost for running locally with ID.me
 #SAML_SETTINGS.issuer                         = "saml-rp.adhocteam.us"
